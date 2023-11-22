@@ -1,0 +1,46 @@
+{% include 'header.html' %}
+
+
+<div class="container mt-5">
+    <h1>Authorization Check</h1>
+
+    <div id="authorizationMessage" class="mt-3"></div>
+
+    <script>
+        
+        function getCookie(name) {
+            const cookies = document.cookie.split("; ");
+            for (const cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.split("=");
+                if (cookieName === name) {
+                    return cookieValue;
+                }
+            }
+            return null; // Cookie not found
+        }
+        // Function to check authorization
+        function checkAuthorization() {
+            
+            fetch('http://localhost:5000/check_authorization', { 
+                    method: 'GET', 
+                    credentials: 'include' ,
+                    headers: {
+                        'Authorization': `Bearer ${getCookie()}`
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    const authorizationMessage = document.getElementById('authorizationMessage');
+                    authorizationMessage.innerHTML = `<div class="alert alert-info" role="alert">${data.message}</div>`;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Call the function when the page loads
+        window.onload = checkAuthorization;
+    </script>
+</div>
+
+</body>
+</html>

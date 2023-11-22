@@ -1,0 +1,23 @@
+{% include 'header.html' %}
+
+
+<div class="container mt-5">
+    <h1>User List</h1>
+    <a class="btn btn-success" href="/add_user">Add user</a>
+
+    <div id="users-list">
+        {% for user in users %}
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">User ID: {{ user.id }}</h5>
+                    <p class="card-text">Username: {{ user.username }}</p>
+                    <!-- Add more user details as needed -->
+                    <a href="{{ url_for('get_user', user_id=user.id) }}" class="btn btn-primary">Details</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+</body>
+</html>

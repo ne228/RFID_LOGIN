@@ -1,0 +1,197 @@
+{% include 'header.html' %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="text-center">Login</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/login_2auth">
+                        <div class="form-group mt-3">
+                            <label for="rfid_id">Поднесите карту к считывателю:</label>
+                            <input type="hidden" name="rfid_id" id="hidden_rfid_id" value="">
+                            <input type="text" class="form-control" id="rfid_id" name="rfid_id" disabled required>
+                        </div>
+                        <div id="userNotFoundMessage" class="mt-3 alert alert-danger" style="display:none;">
+                            Пользователь не найден
+                        </div>
+                        <button type="button" class="btn btn-secondary mt-2 ml-2" id="toggleReadRfid">Start Reading RFID</button>
+                      
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Получаем параметр user_id из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id');       
+    var isReadingRfid = false; 
+
+
+    function handleInputChange(input) {
+        // Добавляем класс input-change, чтобы запустить анимацию
+        input.classList.add('input-change');
+    
+        // Удаляем класс через небольшую задержку, чтобы анимация завершилась
+        setTimeout(function() {
+            input.classList.remove('input-change');
+        }, 600); // Здесь 300 миллисекунд - это длительность анимации в CSS (transition-duration)
+    }
+
+    function toggleReadRfid() {
+        // Изменяем состояние флага прослушивания RFID
+        isReadingRfid = !isReadingRfid;
+
+        // Обновляем текст и стиль кнопки в зависимости от состояния
+        var toggleReadRfidButton = document.getElementById('toggleReadRfid');
+        if (isReadingRfid) {
+            toggleReadRfidButton.innerText = 'Stop Reading RFID';
+            toggleReadRfidButton.classList.remove('btn-secondary');
+            toggleReadRfidButton.classList.add('btn-danger');
+            startReadingRfid();
+        } else {
+            toggleReadRfidButton.innerText = 'Start Reading RFID';
+            toggleReadRfidButton.classList.remove('btn-danger');
+            toggleReadRfidButton.classList.add('btn-secondary');
+            stopReadingRfid();
+        }
+    }
+    
+    function readRfid() {
+        return new Promise((resolve, reject) => {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/read_rfid', true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            var input = document.getElementById('rfid_id');
+                            if (input.value == data['rfid'])
+                                return;
+                            document.getElementById('rfid_id').value = data['rfid'];
+                            document.getElementById('hidden_rfid_id').value = data['rfid'];   
+                            handleInputChange(document.getElementById('rfid_id'));                           
+                            console.log('RFID data:', data);
+                            resolve(data);
+                        } catch (parseError) {
+                            console.log("error zone 1");
+                            console.log(parseError);
+                            console.error('Error parsing JSON:', parseError);
+                            reject(parseError);
+                        }
+                    } else {
+                        console.log("error zone 2 ");
+                        var httpError = new Error(`HTTP error! Status: ${xhr.status}`);
+                        console.error('HTTP error:', httpError);
+                        reject(httpError);
+                    }
+                }
+            };
+            //xhr.onerror = function () {
+            //    console.log("error zone 3");
+            //    var networkError = new Error('Network error');
+            //    console.error('Network error:', networkError);
+            //    reject(networkError);
+            //};
+            xhr.send();
+        });
+    }
+
+    let intervalId;
+    function startReadingRfid() {
+        // Ваш код для начала прослушивания RFID
+        // Например, можно использовать setInterval для периодических запросов к /read_rfid и обновления значения поля rfid_id
+        // Примерно так: setInterval(updateRfidValue, 1000);
+        console.log("start");
+        intervalId  = setInterval(readRfid, 1000);
+    }
+
+    function stopReadingRfid() {
+        // Ваш код для остановки прослушивания RFID
+        // Например, можно использовать clearInterval для остановки периодических запросов
+        console.log("clear");
+        clearInterval(intervalId);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById('toggleReadRfid').addEventListener('click', toggleReadRfid);
+    });
+
+    // Запускаем чтение с загрузкой страницы
+    toggleReadRfid();
+
+    // LOGIN ZONE
+
+    
+    function setTokenCookie(token) {
+        document.cookie = `token=${token}; path=/;`;
+    }
+
+    // Ваш код для отправки запроса на сервер
+    function sendDataToLogin() {
+        // Получаем данные из input
+        var inputData = document.getElementById("hidden_rfid_id").value;
+    
+        // Создаем объект FormData и добавляем данные
+        var formData = new FormData();
+        formData.append("rfid", inputData);
+    
+        // Отправляем Ajax-запрос
+        fetch('/login_2auth', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'  // Устанавливаем credentials для передачи куки
+        })
+        .then(response => {
+            if (response.status === 400) {
+                throw new Error('Login2auth: User not found');
+            }
+    
+            if (!response.ok) {
+                throw new Error(`Login2auth: HTTP error! Status: ${response.status}`);
+            }
+    
+            return response.json();
+        })
+        .then(data => {
+            // Обработка данных, которые вернул сервер
+    
+            if (data.token) {
+                setTokenCookie(data.token);
+            }
+    
+            // Переход по URL, если он предоставлен
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        })
+        .catch(error => {
+            if (error.message === 'User not found') {
+                document.getElementById('userNotFoundMessage').style.display = 'block';
+            } else {
+                console.error('Error:', error.message);
+            }
+
+        });
+    }
+    
+    setInterval(sendDataToLogin, 1000);
+    
+
+
+</script>
+
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>

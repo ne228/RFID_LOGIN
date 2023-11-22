@@ -1,0 +1,138 @@
+{% include 'header.html' %}
+
+    <div class="container mt-5">
+        <h1>Add RFID</h1>
+    
+        <div class="card mt-3">
+            <div class="card-body">
+                <!-- Display user information -->
+                <h5 class="card-title">User ID: {{ user.id }}</h5>
+                <p class="card-text">Username: {{ user.username }}</p>
+                <p class="card-text">First Name: {{ user.first_name }}</p>
+                <p class="card-text">Last Name: {{ user.last_name }}</p>
+    
+                <h5 class="mt-3">RFID Entries:</h5>
+                {% if user.rfid %}
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">RFID ID: {{ user.rfid.id }}</h6>
+                            <p class="card-text">RFID Name: {{ user.rfid.name }}</p>
+                            <!-- Add more RFID details as needed -->
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No RFID entries for this user.</p>
+                {% endif %}
+    
+                <!-- Add RFID form -->
+                <form method="post" action="/add_rfid/{{user.id}}">
+                    <div class="form-group mt-3">
+                        <label for="rfid_id">New RFID ID:</label>
+                        <input type="hidden" name="rfid_id" id="hidden_rfid_id" value="{{ user.rfid.id }}">
+                        <input type="text" class="form-control" id="rfid_id" name="rfid_id" disabled required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rfid_name">New RFID Name:</label>
+                        <input type="text" class="form-control" id="rfid_name" name="rfid_name" required>
+                    </div>
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <button type="submit" class="btn btn-success">Save RFID</button>
+                    <button type="button" class="btn btn-secondary ml-2" id="toggleReadRfid">Start Reading RFID</button>
+                </form>
+
+              
+               
+                <!-- Back to User Details link -->
+                <a href="{{ url_for('get_user', user_id=user.id) }}" class="btn btn-primary mt-3">Back to User Details</a>
+            </div>
+        </div>
+    </div>
+
+    
+   
+
+
+   
+
+    <script>
+        // Получаем параметр user_id из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id');       
+        var isReadingRfid = false; 
+
+        function toggleReadRfid() {
+            // Изменяем состояние флага прослушивания RFID
+            isReadingRfid = !isReadingRfid;
+
+            // Обновляем текст и стиль кнопки в зависимости от состояния
+            var toggleReadRfidButton = document.getElementById('toggleReadRfid');
+            if (isReadingRfid) {
+                toggleReadRfidButton.innerText = 'Stop Reading RFID';
+                toggleReadRfidButton.classList.remove('btn-secondary');
+                toggleReadRfidButton.classList.add('btn-danger');
+                startReadingRfid();
+            } else {
+                toggleReadRfidButton.innerText = 'Start Reading RFID';
+                toggleReadRfidButton.classList.remove('btn-danger');
+                toggleReadRfidButton.classList.add('btn-secondary');
+                stopReadingRfid();
+            }
+        }
+        
+        function readRfid() {
+            return new Promise((resolve, reject) => {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/read_rfid', true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                var data = JSON.parse(xhr.responseText);
+                                document.getElementById('rfid_id').value = data['rfid'];
+                                document.getElementById('hidden_rfid_id').value = data['rfid'];                               
+                                console.log('RFID data:', data);
+                                resolve(data);
+                            } catch (parseError) {
+                                console.error('Error parsing JSON:', parseError);
+                                reject(parseError);
+                            }
+                        } else {
+                            var httpError = new Error(`HTTP error! Status: ${xhr.status}`);
+                            console.error('HTTP error:', httpError);
+                            reject(httpError);
+                        }
+                    }
+                };
+                xhr.onerror = function () {
+                    var networkError = new Error('Network error');
+                    console.error('Network error:', networkError);
+                    reject(networkError);
+                };
+                xhr.send();
+            });
+        }
+
+        let intervalId;
+        function startReadingRfid() {
+            // Ваш код для начала прослушивания RFID
+            // Например, можно использовать setInterval для периодических запросов к /read_rfid и обновления значения поля rfid_id
+            // Примерно так: setInterval(updateRfidValue, 1000);
+            console.log("start");
+            intervalId  = setInterval(readRfid, 1000);
+        }
+
+        function stopReadingRfid() {
+            // Ваш код для остановки прослушивания RFID
+            // Например, можно использовать clearInterval для остановки периодических запросов
+            console.log("clear");
+            clearInterval(intervalId);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById('toggleReadRfid').addEventListener('click', toggleReadRfid);
+        });
+    </script>
+
+
+</body>
+</html>
