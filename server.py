@@ -42,6 +42,13 @@ def _user_to_model(user):
     return user_data
 
 
+"""
+    Функция `add_user` — это маршрут в приложении Python Flask, который обрабатывает добавление нового пользователя.
+     пользователя в базе данных.
+     :return: перенаправление на страницу входа, если пользователь не прошел аутентификацию. Если метод запроса
+     POST, он добавляет нового пользователя в базу данных и перенаправляет на страницу пользователя. Если метод запроса
+     GET, он отображает шаблон add_user.html с пользователем, для которого установлено значение None.
+"""
 @app.route('/add_user', methods=['GET', 'POST'])
 def add_user():   
     try:    
@@ -62,6 +69,14 @@ def add_user():
     except Exception as e:
         Logger.error(e)
 
+"""
+    This function deletes a user from the database based on their user ID.
+    @param user_id - The `user_id` parameter is an integer that represents the ID of the user to be
+    deleted.
+    @returns either a redirect to the login page if the user is not authenticated, or it is returning a
+    rendered template with a success or failure message indicating whether the user with the given ID
+    was successfully deleted or not.
+"""
 @app.route('/delete_user/<int:user_id>', methods=['GET'])
 def delete_user(user_id):   
     try:
@@ -79,7 +94,12 @@ def delete_user(user_id):
 
     
 
-
+"""
+    The function `add_rfid_to_user_form` is a Flask route that handles both GET and POST requests to add
+    an RFID to a user in a database.
+    @param user_id - The user_id parameter is the ID of the user to whom the RFID is being added.
+    @returns In the code snippet, there are two possible return statements:
+"""
 @app.route('/add_rfid/<int:user_id>', methods=['GET', 'POST'])
 def add_rfid_to_user_form(user_id):
     try:

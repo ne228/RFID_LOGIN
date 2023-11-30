@@ -40,6 +40,7 @@ class DatabaseManager:
 
         
 
+
     def add_user(self, username, first_name, name, last_name, password):
         user = User.create(username=username, first_name=first_name, name=name, last_name=last_name, password = password)
         return user
