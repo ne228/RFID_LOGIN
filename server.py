@@ -42,6 +42,13 @@ def _user_to_model(user):
     return user_data
 
 
+
+@app.route('/', methods=['GET'])
+def load():
+    return redirect(url_for('get_users'))
+        
+    
+
 """
     Функция `add_user` — это маршрут в приложении Python Flask, который обрабатывает добавление нового пользователя.
      пользователя в базе данных.
@@ -134,6 +141,8 @@ def get_user_by_rfid():
     except Exception as e:
         Logger.error(e)
 
+
+
 # Эндпоинт для получения списка всех пользователей
 @app.route('/get_users', methods=['GET'])
 def get_users():
@@ -214,7 +223,7 @@ def login():
                         app.config['SECRET_KEY'], algorithm='HS256')
         
             
-            response = make_response(redirect(url_for('check_authorization')))
+            response = make_response(redirect(url_for('get_users')))
             response.set_cookie('token', token)
             Logger.info(f"Login in system user_id = {user.id}")  
             return response
@@ -230,21 +239,70 @@ def login_2auth():
         if request.method == 'POST':
             try:
                 rfid = request.form.get('rfid')
+                username = request.form.get('username')
+                password = request.form.get('password')
                 if rfid == "":
-                    return jsonify({'error': 'RFID is empty', 'message': 'mot found'}), 400
+                    return jsonify({'error': 'RFID is empty', 'message': 'not found'}), 400
                 
-                user = db_manager.get_user_by_rfid(rfid_id=rfid)
+                user_RFID = db_manager.get_user_by_rfid(rfid_id=rfid)               
+                               
+                if user_RFID == None:
+                    return jsonify({'error': 'RFID is empty', 'message': 'not found'}), 400
                 
-                if user == None:
-                    return jsonify({'error': 'RFID is empty', 'message': 'mot found'}), 400
+                
+                user_login = db_manager.get_user_by_username_and_password(username=username, password=password)
+
+                if (user_login.id != user_RFID.id):
+                    return jsonify({'error': 'RFID is empty', 'message': 'not found'}), 400
+                
+                
             
+                token = jwt.encode({'user_id': user_RFID.id, 'exp': datetime.utcnow() + timedelta(hours=1)},
+                            app.config['SECRET_KEY'], algorithm='HS256')
+            
+                
+                response_data = {
+                    'token': token,
+                    'url': "/get_users"                    
+                }
+                # Устанавливаем токен в куки
+                response = make_response(jsonify(response_data), 200)
+                response.set_cookie('token', token)
+                Logger.info(f"Login_2auth in system user_id = {user_RFID.id} with rfid = {rfid}") 
+                return response
+            except Exception as e:
+                response_data = {
+                    'error': str(e),
+                    'message': "not found"
+                }
+                return make_response(jsonify(response_data), 500)
+            
+
+        return render_template('login_2auth.html')
+    except Exception as e:
+        Logger.error(e)
+    
+@app.route('/login_rfid', methods=['GET', 'POST'])
+def login_rfid():
+    try:
+        if request.method == 'POST':
+            try:
+                rfid = request.form.get('rfid')
+                if rfid == "":
+                    return jsonify({'error': 'RFID is empty', 'message': 'not found'}), 400
+                
+                user = db_manager.get_user_by_rfid(rfid_id=rfid)               
+                               
+                if user == None:
+                    return jsonify({'error': 'RFID is empty', 'message': 'not found'}), 400
+           
                 token = jwt.encode({'user_id': user.id, 'exp': datetime.utcnow() + timedelta(hours=1)},
                             app.config['SECRET_KEY'], algorithm='HS256')
             
                 
                 response_data = {
                     'token': token,
-                    'url': "/check_authorization"                    
+                    'url': "/get_users"                    
                 }
                 # Устанавливаем токен в куки
                 response = make_response(jsonify(response_data), 200)
@@ -259,10 +317,11 @@ def login_2auth():
                 return make_response(jsonify(response_data), 500)
             
 
-        return render_template('login_2auth.html')
+        return render_template('login_rfid.html')
     except Exception as e:
         Logger.error(e)
     
+
 
 
 @app.route('/logout')

@@ -3,36 +3,37 @@
 
 
 <div class="container mt-5">
-    <h1>User Details</h1>
+    <h1>Детали</h1>
 
     <div class="card mt-3">
         <div class="card-body">
-            <h5 class="card-title">User ID: {{ user.id }}</h5>
+            <h5 class="card-title">Пользователь ID: {{ user.id }}</h5>
             <p class="card-text">Username: {{ user.username }}</p>
-            <p class="card-text">First Name: {{ user.first_name }}</p>
-            <p class="card-text">Last Name: {{ user.last_name }}</p>
+            <p class="card-text">Фамилия: {{ user.first_name }}</p>
+            <p class="card-text">Имя: {{ user.name }}</p>
+            <p class="card-text">Отчество: {{ user.last_name }}</p>
             
-            <h5 class="mt-3">RFID Entries:</h5>
+            <h5 class="mt-3">RFID карта:</h5>
             {% if user.rfid %}
                 <div class="card">
                     <div class="card-body">
                         <h6 class="card-subtitle mb-2 text-muted">RFID ID: {{ user.rfid.id }}</h6>
-                        <p class="card-text">RFID Name: {{ user.rfid.name }}</p>
+                        <p class="card-text">Имя RFID метки: {{ user.rfid.name }}</p>
                         <!-- Add more RFID details as needed -->
                     </div>
                 </div>
             {% else %}
-                <p>No RFID entries for this user.</p>
+                <p>Пользователь не имеет привязанных RFID меток</p>
             {% endif %}
             
             <!-- Add link to the 'add_rfid_to_user' endpoint -->
-            <a href="/add_rfid/{{user.id}}" class="btn btn-success mt-3">Add RFID</a>
+            <a href="/add_rfid/{{user.id}}" class="btn btn-success mt-3">Настройки RFID</a>
 
             <a href="/delete_user/{{user.id}}" class="btn btn-danger mt-3">Удалить пользователя</a>
             <br />
             
             <!-- Update link to the 'get_users' endpoint -->
-            <a href="{{ url_for('get_users') }}" class="btn btn-primary mt-3">Back to User List</a>
+            <a href="{{ url_for('get_users') }}" class="btn btn-primary mt-3">Вернуться к списку пользователей</a>
 
         </div>
     </div>

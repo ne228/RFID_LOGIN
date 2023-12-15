@@ -1,11 +1,15 @@
 <!-- header.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Website</title>
+    <title>RFID</title>
     <!-- Подключение Bootstrap CSS -->
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap">
+
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
@@ -15,7 +19,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <!-- Логотип или название сайта -->
-        <a class="navbar-brand" href="/get_users">RFID</a>
+        <a class="navbar-brand" href="/get_users">Главная</a>
 
         <!-- Кнопка "бургера" для мобильных устройств -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -27,17 +31,18 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="/login">Login</a>
+                    <a class="nav-link" href="/login">Войти</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/login_2auth">Login 2auth</a>
+                    <a class="nav-link" href="/login_rfid">Войти по RFID</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout">Logout</a>
+                    <a class="nav-link" href="/login_2auth">Войти по логину и RFID</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/check_authorization">Check Authorization</a>
+                    <a class="nav-link" href="/logout">Выйти</a>
                 </li>
+               
                 <li class="nav-item">
                     <span class="nav-link" id="current-user-span">
                         <!-- Сюда будет вставлен результат запроса -->
@@ -63,7 +68,7 @@
                 // Если запрос успешен, обновляем элемент на странице
                 var currentUserSpan = document.getElementById("current-user-span");
                 var response = JSON.parse(xhr.responseText);
-                currentUserSpan.textContent = "Current User: " + response.username;
+                currentUserSpan.textContent = "Пользователь: " + response.username;
             }
         };
     

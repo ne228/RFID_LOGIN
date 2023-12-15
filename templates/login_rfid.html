@@ -9,16 +9,6 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="/login_2auth">
-
-                        <div class="form-group">
-                            <label for="username">Username:</label>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Введите username">
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Пароль:</label>
-                            <input type="password" class="form-control" id="password"  name="password" placeholder="Введите пароль">
-                        </div>
-
                         <div class="form-group mt-3">
                             <label for="rfid_id">Поднесите карту к считывателю:</label>
                             <input type="hidden" name="rfid_id" id="hidden_rfid_id" value="">
@@ -147,24 +137,20 @@
     function sendDataToLogin() {
         // Получаем данные из input
         var inputData = document.getElementById("hidden_rfid_id").value;
-        var username = document.getElementById("username").value;
-        var password = document.getElementById("password").value;
+
 
         // Создаем объект FormData и добавляем данные
         var formData = new FormData();
         formData.append("rfid", inputData);
-        formData.append("username", username);
-        formData.append("password", password);
-        console.log(formData);
-        console.log(username);
+
         // Отправляем Ajax-запрос
-        fetch('/login_2auth', {
+        fetch('/login_rfid', {
             method: 'POST',
             body: formData,
             credentials: 'same-origin'  // Устанавливаем credentials для передачи куки
         })
         .then(response => {
-            if (response.status === 400) {
+            if (response.status === 400) {                
                 throw new Error('Login2auth: User not found');
             }
     
@@ -176,7 +162,7 @@
         })
         .then(data => {
             // Обработка данных, которые вернул сервер
-    
+           
             if (data.token) {
                 setTokenCookie(data.token);
             }

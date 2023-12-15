@@ -1,49 +1,50 @@
 {% include 'header.html' %}
 
     <div class="container mt-5">
-        <h1>Add RFID</h1>
+        <h1>Добавить RFID</h1>
     
         <div class="card mt-3">
             <div class="card-body">
                 <!-- Display user information -->
-                <h5 class="card-title">User ID: {{ user.id }}</h5>
+                <h5 class="card-title">Пользователь ID: {{ user.id }}</h5>
                 <p class="card-text">Username: {{ user.username }}</p>
-                <p class="card-text">First Name: {{ user.first_name }}</p>
-                <p class="card-text">Last Name: {{ user.last_name }}</p>
+                <p class="card-text">Фамилия: {{ user.first_name }}</p>
+                <p class="card-text">Имя: {{ user.name }}</p>
+                <p class="card-text">Отчество: {{ user.last_name }}</p>
     
-                <h5 class="mt-3">RFID Entries:</h5>
+                <h5 class="mt-3">RFID карта:</h5>
                 {% if user.rfid %}
                     <div class="card">
                         <div class="card-body">
                             <h6 class="card-subtitle mb-2 text-muted">RFID ID: {{ user.rfid.id }}</h6>
-                            <p class="card-text">RFID Name: {{ user.rfid.name }}</p>
+                            <p class="card-text">Имя RFID метки: {{ user.rfid.name }}</p>
                             <!-- Add more RFID details as needed -->
                         </div>
                     </div>
                 {% else %}
-                    <p>No RFID entries for this user.</p>
+                    <p>Пользователь не имеет привязанных RFID меток</p>
                 {% endif %}
     
                 <!-- Add RFID form -->
                 <form method="post" action="/add_rfid/{{user.id}}">
                     <div class="form-group mt-3">
-                        <label for="rfid_id">New RFID ID:</label>
+                        <label for="rfid_id">Новый RFID ID:</label>
                         <input type="hidden" name="rfid_id" id="hidden_rfid_id" value="{{ user.rfid.id }}">
                         <input type="text" class="form-control" id="rfid_id" name="rfid_id" disabled required>
                     </div>
                     <div class="form-group">
-                        <label for="rfid_name">New RFID Name:</label>
+                        <label for="rfid_name">Новое имя RFID метки:</label>
                         <input type="text" class="form-control" id="rfid_name" name="rfid_name" required>
                     </div>
                     <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <button type="submit" class="btn btn-success">Save RFID</button>
-                    <button type="button" class="btn btn-secondary ml-2" id="toggleReadRfid">Start Reading RFID</button>
+                    <button type="submit" class="btn btn-success mt-2">Сохранить RFID</button>
+                    <button type="button" class="btn btn-secondary mt-2 ml-2" id="toggleReadRfid">Включить считыватель</button>
                 </form>
 
               
                
                 <!-- Back to User Details link -->
-                <a href="{{ url_for('get_user', user_id=user.id) }}" class="btn btn-primary mt-3">Back to User Details</a>
+                <a href="{{ url_for('get_user', user_id=user.id) }}" class="btn btn-primary mt-3">Вернуться к списку пользователей</a>
             </div>
         </div>
     </div>
@@ -67,12 +68,12 @@
             // Обновляем текст и стиль кнопки в зависимости от состояния
             var toggleReadRfidButton = document.getElementById('toggleReadRfid');
             if (isReadingRfid) {
-                toggleReadRfidButton.innerText = 'Stop Reading RFID';
+                toggleReadRfidButton.innerText = 'Выключить считыватель';
                 toggleReadRfidButton.classList.remove('btn-secondary');
                 toggleReadRfidButton.classList.add('btn-danger');
                 startReadingRfid();
             } else {
-                toggleReadRfidButton.innerText = 'Start Reading RFID';
+                toggleReadRfidButton.innerText = 'Включить считыватель';
                 toggleReadRfidButton.classList.remove('btn-danger');
                 toggleReadRfidButton.classList.add('btn-secondary');
                 stopReadingRfid();
@@ -131,6 +132,8 @@
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById('toggleReadRfid').addEventListener('click', toggleReadRfid);
         });
+
+        
     </script>
 
 
